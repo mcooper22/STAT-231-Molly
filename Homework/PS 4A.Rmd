@@ -46,8 +46,8 @@ Check the permissions for the Wikipedia page using the code below. Uncomment the
 
 ```{r}
 #you may need to install the robotstext package if you're on your machine and haven't used it before
-#library(robotstxt)
-#paths_allowed("https://en.wikipedia.org/wiki/Mile_run_world_record_progression")
+library(robotstxt)
+paths_allowed("https://en.wikipedia.org/wiki/Mile_run_world_record_progression")
 ```
 
 
@@ -104,6 +104,8 @@ women_outdoor <- html_table(tables[[8]]) %>%
 
 women <- bind_rows(women_indoor , women_outdoor)%>%
   arrange(Time)
+
+women
   
 
 ```
