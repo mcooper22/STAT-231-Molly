@@ -14,7 +14,6 @@ library(tidyverse)
 library(lubridate) 
 library(ical)
 library(dplyr)
-library(mdsr)
 
 path <- "//Users/mollycooper/Downloads/Data Science/mcooper22@amherst.edu.ical (3)/mcooper22@amherst.edu.ics"
 filename <- "mcooper22@amherst.edu.ics"
