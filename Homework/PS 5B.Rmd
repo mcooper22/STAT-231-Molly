@@ -94,14 +94,6 @@ c. Load `justices.csv` into this file using the `read_csv` function.  Then, run 
 Create a visualization to show the distribution of tenure length of U.S. Supreme Court judges.  Interpret the plot.
 
 ```{r}
-justicevisual <- ggplot(data = justices2, mapping = aes(x = justice , y = tenure_length, fill = date_confirmed)) + geom_point() 
-
-justicevisual + xlab("Justice Number") + ylab("Length of Tenure") + ggtitle("The Tenure Lengths of U.S. Supreme Court Judges")
-```
-
-> ANSWER: This visual demonstrates the tenure lengths of every US Supreme Court Justice. While the numbers are difficult to decipher given the size of the data set, it's arranged in order of confirmation. The scatterplot shows us that there is really no correlation between the date of confirmation and the length of one's tenure - it appears to be a fairly arbitrary connection and has not trended much throughout history.  
-
-```{r}
 justices <- read_csv("/Users/mollycooper/Git Hub/STAT-231-Molly/Homework/justices.csv")
 
 justices2 <- justices %>%
@@ -118,11 +110,19 @@ justices2 <- justices %>%
   # create date confirmed as date variable
   separate(date_confirmed_vote, into = c("date_confirmed_vote", "extra")
            , sep = "\\(") %>%
-  mutate(date_confirmed = lubridate::mdy(date_confirmed_vote))
+  mutate(date_confirmed = lubridate::mdy(date_confirmed_vote))%>%
+  #orderbydateconfirmed
+  arrange(date_confirmed)
+```
+```{r}
+justicevisual <- ggplot(data = justices2, mapping = aes(x = date_confirmed , y = tenure_length)) + geom_point() + theme(axis.text.x=element_text(size=rel(0.5), angle=90))
+
+justicevisual + xlab("Justice Number") + ylab("Date") + ggtitle("The Tenure Lengths of U.S. Supreme Court Judges")
 ```
 
-
+> ANSWER: This visual demonstrates the tenure lengths of every US Supreme Court Justice. While the numbers are difficult to decipher given the size of the data set, it's arranged in order of confirmation. The scatterplot shows us that there is really no correlation between the date of confirmation and the length of one's tenure - it appears to be a fairly arbitrary connection and has not trended much throughout history. 
 \newpage
+
 # 2. Brainy Quotes
 
 a. Confirm (using an R command) that automated scraping of the Brainy Quote webpage (https://www.brainyquote.com/) is allowed.
