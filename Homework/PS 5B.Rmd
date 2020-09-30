@@ -120,7 +120,7 @@ justicevisual <- ggplot(data = justices2, mapping = aes(x = date_confirmed , y =
 justicevisual + xlab("Justice Confirmation Date") + ylab("Length of Tenure in Years") + ggtitle("The Tenure Lengths of U.S. Supreme Court Judges throughout History")
 ```
 
-> ANSWER: This visual demonstrates the tenure lengths of every US Supreme Court Justice. While the numbers are difficult to decipher given the size of the data set, it's arranged in order of confirmation. The scatterplot shows us that there is really no correlation between the date of confirmation and the length of one's tenure - it appears to be a fairly arbitrary connection and has not trended much throughout history. 
+> ANSWER: This visual demonstrates the tenure lengths of every US Supreme Court Justice relative to their date of confirmation (by judge). The lack of correlation in the data point represents the random variability in tenure length throughout history. It seems that time inducted into the Supreme Court does not neccesarily have bearing on a judge's length of tenure. 
 \newpage
 
 # 2. Brainy Quotes
