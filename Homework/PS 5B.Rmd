@@ -2,6 +2,7 @@
 title: "STAT 231: Problem Set 5B"
 author: "Molly Cooper"
 date: "due by 5 PM on Friday, October 2"
+
 output:
   pdf_document: default
   html_document:
