@@ -177,7 +177,23 @@ How do the top used bigrams compare between the two sources?
 
 > ANSWER:  
 
+
 ```{r}
+
+visual <- commonwords %>% 
+  unnest_tokens(output = word, input = text,token="ngrams",n=2) %>% 
+  group_by(source) %>%
+  count(word, sort = TRUE) %>% 
+  group_by(source) %>%
+  slice(1:10)
+  
+
+  ggplot(data = visual, mapping = aes(x = word, y = n, color = word, fill=word)) +
+  geom_col(show.legend =FALSE) +
+  xlab(NULL) +
+  ylab("Word Frequency in Trump's Tweets") +
+  coord_flip() +
+  facet_wrap(~source)
 
 ```
 
