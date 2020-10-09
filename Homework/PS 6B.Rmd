@@ -68,8 +68,10 @@ load(url("http://varianceexplained.org/files/trump_tweets_df.rda"))
 - `statusSource`
 
 ```{r}
-#confirm all tweets are from `realDonaldTrump`
+#Confirming all tweets are from `realDonaldTrump`
+unique(trump_tweets_df$screenName)
 
+#Including only desired variables
 tweets <- trump_tweets_df[c(1, 5, 10)]
 
 ```
@@ -80,7 +82,7 @@ tweets <- trump_tweets_df[c(1, 5, 10)]
 > ANSWER: There are 5 different sources: (1 is used 762 times: 2 is used 628 times: 3 is used 120 times: 4 and 5 are used once).
 
 ```{r}
-
+#Counting and sorting the number of twitter sources
 tweetsource <- tweets %>%
   count(statusSource) %>%
   arrange(desc(n))
@@ -138,7 +140,10 @@ commonwords <- texttoword %>%
 
 
 ```{r}
+
 # Android word cloud
+
+pal <- brewer.pal(10, "Paired")
 
 AndroidWords <- commonwords %>% 
   filter(source == "Android")%>%
@@ -168,33 +173,52 @@ wordcloud(
 ```
 
 
-```
 
 \newpage
 2b. Create a visualization that compares the top 10 *bigrams* appearing in tweets by each source (that is, facet by source).  After creating a dataset with one row per bigram, you should remove any rows that contain a stop word within the bigram.  
 
 How do the top used bigrams compare between the two sources?
 
-> ANSWER:  
+> ANSWER: The top used bigrams between the two sources demonstrate how different the tone of the language used in Trump's iPhone and Android tweets is: "join me", "makeamericagreatagain", and "thank you" are frequently used in his iPhone tweets which correspond to formal language and his campaign slogans whereas the most frequently used rhetoric in his Android tweets is: "crooked hillary", "bernie sanders", and "ted cruz" which suggests that he's typically using this source in a more informal manner to trash-talk other politicians rather than focusing on his own campaign. 
 
 
 ```{r}
+#Cutting stop words that were shown in the original visualization
+stopwords <- tribble(
+  ~word, ~lexicon,
+  "https t.co", "CUSTOM",
+  "will be", "CUSTOM",
+  "trump2016 https", "CUSTOM",
+  "of the", "CUSTOM",
+  "makeamericagreatagain https", "CUSTOM",
+  "is a", "CUSTOM",
+  "in the", "CUSTOM",
+  "i will", "CUSTOM",
+  "for the", "CUSTOM",
+  "to the", "CUSTOM",
+  "americafirst https", "CUSTOM",
+  "you for", "CUSTOM",
+  "i am", "CUSTOM",
+  "me in", "CUSTOM",
+  "to be", "CUSTOM"
+)
 
-visual <- commonwords %>% 
+#Creating the bigram data
+visual <- tweetdata %>% 
   unnest_tokens(output = word, input = text,token="ngrams",n=2) %>% 
+  anti_join(stopwords, by = "word") %>%
   group_by(source) %>%
   count(word, sort = TRUE) %>% 
   group_by(source) %>%
   slice(1:10)
   
-
+#Creating a visualization for the bigram dataset
   ggplot(data = visual, mapping = aes(x = word, y = n, color = word, fill=word)) +
   geom_col(show.legend =FALSE) +
   xlab(NULL) +
   ylab("Word Frequency in Trump's Tweets") +
   coord_flip() +
   facet_wrap(~source)
-
 ```
 
 
@@ -203,7 +227,31 @@ visual <- commonwords %>%
 
 > ANSWER: 
 
+> Anger -> (Android):363/2447=0.15 , Anger(iPhone):170/2165=0.8 
+> Joy -> (Android):292/2447=0.12 , (iPhone):176/2165=0.8
+> Positive -> (Android):794/2447=0.32 , (iPhone):449/2165=0.21
+> Negative -> (Android):662/2447=0.27, (iPhone): 266/2165=0.12
+
+> Based on my calculations it seems that Trump uses more "Angry" and "Negative" words on his Adroid but also more "Joy" and "Positive" words. I would extrapolate that Trump is sending impassioned and personal opinions on his Android and he is sending more neutral and informative tweets about his campaign from his iPhone. 
+
 ```{r}
+nrc_lexicon <- get_sentiments("nrc")
+
+#Finding the number of words from each source that correspond to each emotion
+emotion <- commonwords%>%
+  inner_join(nrc_lexicon, by = "word") %>% 
+  group_by(source) %>%
+  count(sentiment)
+
+#Total number of words
+total <- emotion$n
+
+#Out of curiosity I calculated the overall proportion of his tweets by sentiment
+emotion <- emotion%>%
+  mutate(prop = n/sum(total))
+
+emotion
+
 
 
 ```
@@ -212,5 +260,5 @@ visual <- commonwords %>%
 \newpage
 2d. Lastly, based on your responses above, do you think there is evidence to support Robinson's claim that Trump only writes the (angrier) Android half of the tweets from realDonaldTrump?  In 2-4 sentences, please explain.
 
-> ANSWER: 
+> ANSWER: All of my responses do support this theory. To expand on just the emotion behind his tweets it seems that Trump is perhaps using his iPhone in a more professional manner and his Android in a personal manner. This likely indicates that a campaign manager or coordinator is controlling and/or writing the tweets that are sent from his iPhone to inform and encourage his public image. While his Android tweets are likely written by himself and used as a platform for his personal opinions and frusturations. It's very interesting how much insight we can glean from analyzing language through R and pinpointing the differences between seemingly unimportant distinctions from a source code. 
 
