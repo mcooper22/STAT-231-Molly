@@ -38,14 +38,14 @@ knitr::opts_chunk$set(
 \newpage 
 # If you discussed this assignment with any of your peers, please list who here:
 
-> ANSWER:
+> ANSWER: Alex Ristic 
 
 \newpage
 # 1. More Migration
 
 1a. Consider migration between the following countries: Brazil, Ghana, Great Britain, Honduras, India, South Korea, United States, and Vietnam.  Compare the TOTAL (males + females) migration between these countries over time.  In separate (directed) graphs for 1980 and 2000, visualize the network for the these countries with edge width and/or edge color corresponding to migration flow size.  Interpret the two graphs -- what *information in context* do they convey?
 
-> ANSWER: Both graphs represent the migration patterns between Brazil, Ghana, Great Britain, Honduras, India, South Korea, United States, and Vietnam in 1980 and 2000, the width of the lines between countries represents the number of people migrating between each country in these years. The "1980 Migration" tells us that people most commonly moved between The United States and Great Britain, whereas people least often moved between Indonesian, Honduras, Brazil, and Ghana as well as Korea and India. Transitioning to the "2000 Migration", we see that the most popular movement is still between the US and Great Britain, whereas the least popular are now Vietnam to Brazil (or Brazil to Vietnam), Korea to Vietnam, Korea to Ghana, and Brazil to Vietnam. 
+> ANSWER: Both graphs represent the migration patterns of total people between Brazil, Ghana, Great Britain, Honduras, India, South Korea, United States, and Vietnam in 1980 and 2000, the width of the lines between countries represents the number of people migrating between each country in these years. The "1980 Migration" tells us that people most commonly most commonly moved between The United States and Great Britain and India and Great Britain, whereas people least often moved between Korea, Ghana, and Vietnam as well as Vietnam to Brazil and Korea to Honduras. Transitioning to the "2000 Migration", we see that the most popular movement is still between the US and Great Britain, whereas the least popular were Korea to Vietnam and Honduras to India.
 
 ```{r, message = FALSE}
 path_in <- '/Users/mollycooper/Git Hub/STAT-231-Molly/Homework'
@@ -53,15 +53,18 @@ MigrationFlows <- read_csv(paste0(path_in,"/MigrationFlows.csv"))
 
 countries <- c("BRA","GBR","GHA","HND","IND","KOR", "USA", "VNM")
 
-#Compare TOTAL Migration Over Time
-
 #Creating Data Sets
 DataOne <- MigrationFlows %>%
   select(origincode, destcode, Y1980) %>%
-  filter(Y1980 > 0, origincode %in% countries, destcode %in% countries)
+  filter(Y1980 > 0, origincode %in% countries, destcode %in% countries) %>%
+  group_by(destcode, origincode) %>%
+  summarize('Y1980' = sum(Y1980))
 DataTwo <- MigrationFlows %>%
   select(origincode, destcode, Y2000) %>%
-  filter(Y2000 > 0, origincode %in% countries, destcode %in% countries)
+  filter(Y2000 > 0, origincode %in% countries, destcode %in% countries) %>%
+  group_by(destcode, origincode) %>%
+  summarize('Y2000' = sum(Y2000))
+
 
 #Creating Migration Flows
 Migration1980 <- graph_from_data_frame(DataOne, directed = TRUE)
@@ -93,11 +96,11 @@ ggplot(data = ggnetwork(Migration2000)
 1b. Compute the *unweighted* in-degree for Brazil in this network from 2000, and the *weighted* in-degree for Brazil in this network from 2000.  In 1-2 sentences, interpret these numbers in context (i.e., without using the terms "in-degree" or "weighted").
 
 
-> ANSWER:  There are 14 routes which map to Brazil as a destination from the countries listed and there were 20885 times people took routes that migrated into Brazil in 2000 from one of the countries listed. 
+> ANSWER:  The unweighted in-degree for Brazil indicates that there are 4 outgoing edges which map from the "Brazil node" as a place of origin. The weighted in-degree tells us that there are 18050 times the different routes which originated in Brazil were migrated from (adding all of the edges).
 
 ```{r}
 #Calculating Unweighted In-Degree
-strength(Migration2000, mode = "in")
+degree(Migration2000, mode = "in")
 
 #Calculating Weighted In-Degree
 strength(Migration2000, weights = E(Migration2000)$Y2000, mode = "in")
@@ -107,7 +110,7 @@ strength(Migration2000, weights = E(Migration2000)$Y2000, mode = "in")
 
 1c. Among these same countries, idenitify the top 5 countries *of origin* and *of destination* (separately) in 1980 using (weighted) degree centrality.  Interpret this information.
 
-> ANSWER: The top 5 countries of origin are: Great Britain, Korea, India, United States, and Vietnam, indicating that these five countries are the most centeral places of origin in this network. The top 5 countries of destination are: United States, Great Britain, India, Brazil, and Korea, this indicates that these five countries were the most central destinations in this pattern of migration. 
+> ANSWER: The top 5 countries of origin are: Great Britain, Brazil, Korea, United States, and Ghana, indicating that these five countries are the most centeral places of origin in this network. The top 5 countries of destination are: United States, Great Britain, Vietnam, India, and Korea, this indicates that these five countries were the most central destinations in this pattern of migration. 
 
 ```{r}
 #Calculating Countries of Origin
@@ -120,9 +123,9 @@ strength(Migration1980, weights = E(Migration1980)$Y1980, mode = "in")
 
 1d. Among these same countries, idenitify the top 5 countries *of origin* and *of destination* (separately) in 2000 using (weighted) degree centrality.  Interpret this information.
 
-> ANSWER: Top 5 Countries of Origin --> Great Britain, USA, India, Brazil, Vietnam
+> ANSWER: Top 5 Countries of Origin --> Great Britain, Brazil, India, USA, and Ghana
 This information tells us that in 2000, within this migration flow, these 5 countries were most commonly migrated from (places of origin).
-Top 5 Countries of Destination --> USA, Great Britain, India, Brazil Ghana
+Top 5 Countries of Destination --> Brazil, Great Britain, India, USA, and Vietnam
 This information tells us that these 5 countries were most commonly migrated to in this network, ie. they were the most popular destinations. 
 It's interesting to consider the differences in centrality between 1980 and 2000 in the context of wars, political climate, and economic development... these numbers clearly corrolate!
 
@@ -148,29 +151,9 @@ diameter(Migration2000, directed = TRUE)
 
 1f. What is the density of this network in 2000? In 1-2 sentences, interpret this value.
 
-> ANSWER:  *I made the assumption that you meant in 1980? 
-In 1980, the migration flow has the exact same diameter with each country have nodes at most two hops away from one another. 
+> ANSWER: The density of the network in 2000 is ~.768, this indicates that of all of the possible routes between these countries, 76.8% of the routes are utilized in this network. 
 
 ```{r}
-diameter(Migration1980, directed = TRUE)
+graph.density(Migration2000)
 ```
 
-
-\newpage
-# 2. Love Actually (OPTIONAL PRACTICE)
-
-This problem is *optional* and will not be graded, but is given to provide additional practice interpreting networks and as another real-world example of network analysis that might be intriguing to film buffs. 
-
-Consider the figure "The Two Londons of 'Love Actually'" in [this FiveThirtyEight article](https://fivethirtyeight.com/features/the-definitive-analysis-of-love-actually-the-greatest-christmas-movie-of-our-time/). 
-
-2a. Based on this figure, is the network connected?  In 1-2 sentences, please explain.
-
-> ANSWER: 
-
-2b. Based on the figure, what is the (unweighted) degree for Emma Thompson?  What is the (unweighted) degree for Keira Knightley?  Explain what these values mean for these characters.
-
-> ANSWER: 
-
-2c. Based on the figure, for whom would the (unweighted) betweenness centrality measure be higher: Colin Firth or Hugh Grant?  Explain what this implies. 
-
-> ANSWER:  
