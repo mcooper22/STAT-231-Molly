@@ -410,26 +410,37 @@ Don't spend too long looking for unit-level data you're interested in.  Rather, 
 Code for each is given below.  JUST CHOOSE ONE to focus on.  If you post your image to the Jamboard and have extra time, then you're welcome to explore the others.
 
 ```{r}
-# example of dataset with country information across years
-#library(gapminder)
-#gapminder <- gapminder::gapminder
+# loading gapminder package
+library(gapminder)
+gapminder <- gapminder::gapminder
+# loading literacy data from UNESCO
+path_in <- "/Users/mollycooper/Downloads/literacy_rate_youth_total_percent_of_people_ages_15_24.csv"
+#wrangling dataset
+literacydata <- read_csv(path_in) %>%
+  select(country, `2011`)
 
-# example of dataset with state information from 2013-2014
-#library(fivethirtyeight)
-#hate_crimes <- fivethirtyeight::hate_crimes
+#adding map data
+library(maps)
+data(worldMapEnv) 
 
-# example of another dataset with state information from 1977 
-# from the datasets package loaded above
-#states_1977 <- as.data.frame(state.x77) %>%
-#  add_rownames(var = "State") %>%
-#  janitor::clean_names()
+# then merge with mapping dataset
+literacymap <- literacydata %>%
+  right_join(world_map, by = c("country" = "region"))
 
-# example of dataset with county-level information from 2019
-# see second tab in excel file for variable explanations
-#county_employment <- readxl::read_excel(paste0(path_in, "/Unemployment.xls")
-#                                        , sheet = 1
-#                                        , skip = 7) %>%
-#janitor::clean_names(hate_crimes)
+#creating map
+ggplot(literacymap, aes(x = long, y = lat, group = group
+                      , fill = `2011`)) +
+  geom_polygon(color = "white") +
+  theme_void() +
+  coord_fixed(ratio = 1.3) +
+  labs(fill = "Literacy Rate of Youth 15-24 (1.0 = 100%)") +
+  theme(legend.position="bottom") +
+  scale_fill_distiller(palette = "BuPu", direction = "horizantle")
+
+```
+
+
+
 ```
 
 
