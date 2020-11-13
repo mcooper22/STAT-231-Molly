@@ -46,7 +46,10 @@ knitr::opts_chunk$set(
 
 Baseball players are voted into the Hall of Fame by the members of the Baseball Writers of America Association.  Quantitative criteria are used by the voters, but they are also allowed wide discretion.  The following code identifies the position players who have been elected to the Hall of Fame and tabulates a few basic statistics, include their number of career hits (`tH`), home runs (`tHR`), runs batted in (`tRBI`), and stolen bases (`tSB`).  Use the `kmeans()` function to perform a cluster analysis on these players.  Describe the properties that seem common to each cluster.
 
-> ANSWER:  
+> ANSWER:  Cluster 1: Has the highest correlation between career hits and all of the other metrics. 
+>Cluster 2: Almost always has the most extreme low or high correlations, for example it has the lowest correlation between home runs and stolen bases but the highest between home runs and runs batted. 
+>Cluster 3: Has an extremely high correlation between runs batted in and home runs and hits. 
+It appears that overall the correlation coefficients are mainly what are determining the placement of position players into different clusters. Also, it appears that overall most clusers have very leftward skew in stolen bases. 
 
 ```{r}
 ##### PLEASE DO NOT CHANGE THIS SEED NUMBER
@@ -58,15 +61,36 @@ hof <- Batting %>%
   inner_join(HallOfFame, by = "playerID") %>%
   filter(inducted == "Y" & votedBy == "BBWAA") %>%
   summarize(tH = sum(H), tHR = sum(HR), tRBI = sum(RBI), tSB = sum(SB)) %>%
-  filter(tH > 1000) %>%
-  select(tH, tHR, tRBI, tSB)
+  filter(tH > 1000)
 
-#Applying K-Means algorithm
-km <- kmeans(hof, centers = 4, nstart = 20)
-class(km)
-names(km)
-km$size
-km$centers
+vars <- c("tH", "tHR", "tRBI", "tSB")
+
+#Creating Figure to Observe Within-Cluster Variation
+figure <- matrix(NA, nrow = 10, ncol = 2)
+for(i in 1:10){
+  figure[i, 1] <- i
+  figure[i, 2] <- kmeans(hof[vars]
+                         , centers = i
+                         , nstart = 20)$tot.withinss
+}
+
+ggplot(data = as.data.frame(figure), aes(x = V1, y = V2)) +
+  geom_point() +
+  geom_line() +
+  scale_x_continuous(breaks = c(1:10)) +
+  labs(x = "K-Means", y = expression("Total W"[K-Means]))
+
+#Applying K-Means Algorithm
+km <- kmeans(hof[vars], centers = 3, nstart = 20)
+
+#Creating Cluster Variable
+cluster <- hof %>%
+  mutate(cluster = as.character(km$cluster))
+
+#Creating Matrix
+ggpairs(data = cluster
+        , aes(color = cluster)
+        , columns = vars)
 
 ```
 
@@ -78,7 +102,7 @@ km$centers
 
 For each simulation, fit the linear regression model and display the distribution of 1,000 estimates of the $\beta_1$ parameter.  Does the distribution of the estimates follow a normal distribution?
 
-> ANSWER:   
+> ANSWER:   Yes, the distribution of the estimates appears to be an almost perfectly normal figure, thus the estimates follow a normal distribution despite these violations. 
 
 ```{r}
 # number of observations in each sample
@@ -138,7 +162,7 @@ ggplot(data = as.data.frame(betas), aes(sample = betas)) +
 
 For each simulation, fit the linear regression model and display the distribution of 1,000 estimates of the $\beta_1$ parameter.
 
-> ANSWER:  
+> ANSWER:  It appears that no matter how many trials you run there appears to remain a completely normal distribution for the 1,000 estimates using the beta 1 parameter. Thus, there appears to be no particularly large impact from the skew. 
 
 ```{r}
 # number of observations in each sample
